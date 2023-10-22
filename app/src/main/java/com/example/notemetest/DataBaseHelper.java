@@ -24,8 +24,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     public DataBaseHelper(@Nullable Context context) {
         super(context, "notes.db", null, 1);
     }
-
-    // This is called the first time a database is accessed. There should be code in here to create a new database
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createTableStatement = "CREATE TABLE " + NOTES_TABLE + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -34,14 +32,11 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         db.execSQL(createTableStatement);
     }
 
-    // This is called if the database version number changes. It prevents previous users apps from
-    // breaking when you change the database design
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
     }
 
-    public boolean addOne(Note note) {
+    public void addOne(Note note) {
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -51,27 +46,21 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_DESCRIPTION, note.getDescription());
         cv.put(COLUMN_COLOR, note.getColor());
 
-        long insert = db.insert(NOTES_TABLE, null, cv);
-        if (insert == -1){
-            return false;
-        } else {
-            return true;
-        }
-
+        db.insert(NOTES_TABLE, null, cv);
     }
 
     public List<Note> getAllNotes() {
         List<Note> returnList = new ArrayList<>();
 
-        // Get data from database
-
+        // Get all notes in DB
         String queryString = "SELECT * FROM " + NOTES_TABLE;
 
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.rawQuery(queryString, null);
         if (cursor.moveToFirst()) {
-            // Loop through cursor and create new note objects. Put them into return list
+
+            // Loop through cursor and create new note objects and then put them into return list
             do {
                 int noteID = cursor.getInt(0);
                 String noteTitle = cursor.getString(1);
@@ -82,20 +71,22 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 Note newNote = new Note(noteID, noteTitle, noteSubtitle, noteDescription, noteColor);
                 returnList.add(newNote);
 
-
             } while (cursor.moveToNext());
-
-
-        } else {
-            // Failure. Do not add anything to list.
         }
-
-//         Close cursor and db.
 
         cursor.close();
         db.close();
 
-
         return returnList;
+    }
+
+    public void clearDatabase() {
+        SQLiteDatabase db = this.getWritableDatabase(); // Assuming you have a DatabaseHelper class
+
+        String tableName = "NOTES";
+
+        db.delete(tableName, null, null);
+
+        db.close();
     }
 }

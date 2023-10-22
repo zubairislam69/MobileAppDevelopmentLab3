@@ -68,6 +68,8 @@
         android:layout_height="400dp"
         android:layout_marginTop="50dp"
         android:layout_marginBottom="100dp"
+        android:divider="@drawable/listview_divider"
+        android:dividerHeight="10dp"
         app:layout_constraintBottom_toTopOf="@+id/fabAddNote"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.2"
