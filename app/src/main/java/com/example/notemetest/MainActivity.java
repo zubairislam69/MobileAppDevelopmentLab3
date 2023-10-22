@@ -35,8 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             everyNote = dataBaseHelper.getAllNotes();
-            noteArrayAdapter = new ArrayAdapter<Note>(MainActivity.this, android.R.layout.simple_list_item_1, everyNote);
-            lvNotes.setAdapter(noteArrayAdapter);
+//            noteArrayAdapter = new ArrayAdapter<Note>(MainActivity.this, android.R.layout.simple_list_item_1, everyNote);
+            NoteAdapter adapter = new NoteAdapter(this, everyNote);
+            lvNotes.setAdapter(adapter);
 
         } catch(Exception e) {
         }

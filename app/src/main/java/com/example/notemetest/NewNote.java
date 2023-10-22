@@ -5,6 +5,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -18,7 +19,6 @@ public class NewNote extends AppCompatActivity {
 
     EditText etNoteTitle, etNoteSubtitle, etNoteDescription;
     int defaultColor;
-    RelativeLayout relativeLayout;
     CardView cv;
 
     @Override
@@ -36,7 +36,7 @@ public class NewNote extends AppCompatActivity {
 
         cv = findViewById(R.id.cvDescription);
 
-        defaultColor = ContextCompat.getColor(NewNote.this, com.google.android.material.R.color.design_default_color_primary);
+        defaultColor = Color.WHITE;
 
         btnPickColor.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,8 +78,6 @@ public class NewNote extends AppCompatActivity {
                     Toast.makeText(NewNote.this, "Error creating note", Toast.LENGTH_SHORT).show();
                     note = new Note(-1, "error", "error", "error", 0);
                 }
-
-
 
 
                 DataBaseHelper dataBaseHelper = new DataBaseHelper(NewNote.this);
