@@ -10,8 +10,15 @@ import java.util.List;
 
 public class NoteAdapter extends ArrayAdapter<Note> {
 
-    public NoteAdapter(Context context, List<Note> notes) {
+    public interface OnNoteClickListener {
+        void onNoteClick(Note note);
+    }
+
+    private final OnNoteClickListener onNoteClickListener;
+
+    public NoteAdapter(Context context, List<Note> notes, OnNoteClickListener onNoteClickListener) {
         super(context, 0, notes);
+        this.onNoteClickListener = onNoteClickListener;
     }
 
     @Override
@@ -32,6 +39,13 @@ public class NoteAdapter extends ArrayAdapter<Note> {
 
         // Set the background color based on the 'color' field
         convertView.setBackgroundColor(note.getColor());
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onNoteClickListener.onNoteClick(note);
+            }
+        });
 
         return convertView;
     }
