@@ -6,6 +6,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -94,6 +96,14 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
         int rowsUpdated = db.update(NOTES_TABLE, cv, whereClause, whereArgs);
 
+        db.close();
+    }
+
+    public void deleteNote(int noteId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String whereClause = COLUMN_ID + " = ?";
+        String[] whereArgs = {String.valueOf(noteId)};
+        db.delete(NOTES_TABLE, whereClause, whereArgs);
         db.close();
     }
 

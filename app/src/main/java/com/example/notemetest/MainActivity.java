@@ -16,16 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    DataBaseHelper dataBaseHelper = new DataBaseHelper(MainActivity.this);
+
     List<Note> allNotes;
-
     ListView lvNotes;
-
     SearchView svSearchNote;
-
     FloatingActionButton fab;
 
-    NoteAdapter adapter;
+    DataBaseHelper dataBaseHelper = new DataBaseHelper(MainActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,13 +33,12 @@ public class MainActivity extends AppCompatActivity {
         svSearchNote = findViewById(R.id.svSearchNotes);
         fab = findViewById(R.id.fabAddNote);
 
-
         try {
             allNotes = dataBaseHelper.getAllNotes();
-            adapter = new NoteAdapter(this, allNotes, new NoteAdapter.OnNoteClickListener() {
+            NoteAdapter adapter = new NoteAdapter(this, allNotes, new NoteAdapter.OnNoteClickListener() {
+
                 @Override
                 public void onNoteClick(Note note) {
-
                     Intent intent = new Intent(MainActivity.this, NoteViewer.class);
                     intent.putExtra("note_id", note.getId());
                     intent.putExtra("note_title", note.getTitle());
@@ -51,15 +47,13 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("note_color", note.getColor());
 
                     startActivity(intent);
-
                 }
-
             });
             lvNotes.setAdapter(adapter);
 
         } catch(Exception e) {
+            Toast.makeText(MainActivity.this, "EXCEPTION!", Toast.LENGTH_SHORT).show();
         }
-
         // Query listener to search for notes
         svSearchNote.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
@@ -74,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onNoteClick(Note note) {
                         Intent intent = new Intent(MainActivity.this, NoteViewer.class);
-
+                        intent.putExtra("note_id", note.getId());
                         intent.putExtra("note_title", note.getTitle());
                         intent.putExtra("note_subtitle", note.getSubtitle());
                         intent.putExtra("note_description", note.getDescription());
@@ -87,20 +81,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, NewNote.class);
                 startActivity(intent);
+
             }
         });
     }
 
     public void filterNotes(String query, NoteAdapter.OnNoteClickListener onNoteClickListener) {
-        List <Note> filteredNotes = new ArrayList<>();
+        List<Note> filteredNotes = new ArrayList<>();
         for (Note note : allNotes) {
             if (note.getTitle().toLowerCase().contains(query.toLowerCase())) {
                 filteredNotes.add(note);

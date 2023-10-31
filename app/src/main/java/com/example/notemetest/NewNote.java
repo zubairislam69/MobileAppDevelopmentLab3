@@ -76,7 +76,6 @@ public class NewNote extends AppCompatActivity {
                 }
 
                 startActivity(intent);
-
             }
         });
     }
