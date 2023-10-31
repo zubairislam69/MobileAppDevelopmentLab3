@@ -112,5 +112,3 @@ public class MainActivity extends AppCompatActivity {
         lvNotes.setAdapter(adapter);
     }
 }
-
-

@@ -80,6 +80,23 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return returnList;
     }
 
+    public void updateNote(Note note) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(COLUMN_TITLE, note.getTitle());
+        cv.put(COLUMN_SUBTITLE, note.getSubtitle());
+        cv.put(COLUMN_DESCRIPTION, note.getDescription());
+        cv.put(COLUMN_COLOR, note.getColor());
+
+        String whereClause = COLUMN_ID + " = ?";
+        String[] whereArgs = {String.valueOf(note.getId())};
+
+        int rowsUpdated = db.update(NOTES_TABLE, cv, whereClause, whereArgs);
+
+        db.close();
+    }
+
     public void clearDatabase() {
         SQLiteDatabase db = this.getWritableDatabase(); // Assuming you have a DatabaseHelper class
 
