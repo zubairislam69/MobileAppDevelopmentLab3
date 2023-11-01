@@ -46,11 +46,9 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         subtitleTextView.setText(note.getSubtitle());
         descriptionTextView.setText(note.getDescription());
 
-
         ivImageNote.setImageBitmap(convertBytesToImage(note.getImage()));
 
-
-        // Set the background color based on the 'color' field
+        // Set color selected to note background
         convertView.setBackgroundColor(note.getColor());
 
         convertView.setOnClickListener(new View.OnClickListener() {
@@ -63,6 +61,7 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         return convertView;
     }
 
+    // Function to convert the byte array to an image
     private Bitmap convertBytesToImage(byte[] imageBytes) {
         if (imageBytes != null) {
             return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);

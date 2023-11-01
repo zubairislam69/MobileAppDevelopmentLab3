@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     List<Note> allNotes;
     ListView lvNotes;
     SearchView svSearchNote;
-    FloatingActionButton fab;
+    FloatingActionButton fabAddNote;
 
     DataBaseHelper dataBaseHelper = new DataBaseHelper(MainActivity.this);
 
@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
         lvNotes = findViewById(R.id.lvNotes);
         svSearchNote = findViewById(R.id.svSearchNotes);
-        fab = findViewById(R.id.fabAddNote);
+        fabAddNote = findViewById(R.id.fabAddNote);
 
         try {
             allNotes = dataBaseHelper.getAllNotes();
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        fabAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, NewNote.class);

@@ -30,24 +30,26 @@ import yuku.ambilwarna.AmbilWarnaDialog;
 
 public class NoteViewer extends AppCompatActivity {
 
-    EditText etNoteTitle, etNoteSubtitle, etNoteDescription;
-    CardView cvDescription;
     int defaultColor;
     Button btnPickColor;
 
+    byte[] selectedImageBytes;
+    private final int GALLERY_REQ_CODE = 1;
+    private final int CAMERA_REQUEST_CODE = 2;
+    int id;
+
+    EditText etNoteTitle, etNoteSubtitle, etNoteDescription;
+    CardView cvDescription;
+
     FloatingActionButton fabDeleteNote, fabCapturePhoto, fabUploadImage, fabBack, fabSaveNote;
     ImageView ivImageNoteViewer;
-    DataBaseHelper dataBaseHelper = new DataBaseHelper(NoteViewer.this);
-    byte[] selectedImageBytes;
 
-    private final int GALLERY_REQ_CODE = 1;
-    int id;
+    DataBaseHelper dataBaseHelper = new DataBaseHelper(NoteViewer.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_viewer);
-
 
         Intent intent = getIntent();
 
@@ -82,9 +84,6 @@ public class NoteViewer extends AppCompatActivity {
 
         fabBack = findViewById(R.id.fabBack);
         fabSaveNote = findViewById(R.id.fabSaveNote);
-
-
-
 
         btnPickColor.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,6 +151,14 @@ public class NoteViewer extends AppCompatActivity {
                 startActivityForResult(iGallery, GALLERY_REQ_CODE);
             }
         });
+
+        fabCapturePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, CAMERA_REQUEST_CODE);
+            }
+        });
     }
 
     @Override
@@ -159,17 +166,30 @@ public class NoteViewer extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == GALLERY_REQ_CODE) {
-                // for gallery
+            if (requestCode == CAMERA_REQUEST_CODE) {
+                if (data != null) {
+                    // Handle capturing a photo from the camera
+                    Bundle extras = data.getExtras();
+                    if (extras != null) {
+                        Bitmap capturedImage = (Bitmap) extras.get("data");
+                        // Display the image in your ImageView
+                        ivImageNoteViewer.setImageBitmap(capturedImage);
 
+                        // Convert the Bitmap to a byte array
+                        selectedImageBytes = convertBitmapToBytes(capturedImage);
+
+                    }
+                }
+
+            }
+            if (requestCode == GALLERY_REQ_CODE) {
                 if (data != null) {
                     Uri imageUri = data.getData();
 
                     // Convert the selected image to bytes
                     selectedImageBytes = convertImageToBytes(imageUri);
 
-
-                    // Display the image in your ImageView
+                    // Display image
                     ivImageNoteViewer.setImageURI(imageUri);
                 }
             }
@@ -211,9 +231,14 @@ public class NoteViewer extends AppCompatActivity {
         if (imageBytes != null) {
             return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
         } else {
-            // Handle the case where the byte array is null
             return null;
         }
+    }
+
+    private byte[] convertBitmapToBytes(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
     }
 
 }

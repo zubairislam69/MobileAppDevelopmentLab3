@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,22 +25,30 @@ import java.io.InputStream;
 import yuku.ambilwarna.AmbilWarnaDialog;
 public class NewNote extends AppCompatActivity {
 
-    EditText etNoteTitle, etNoteSubtitle, etNoteDescription;
-    Button backButton, saveNoteButton, btnPickColor;
+    private final int GALLERY_REQ_CODE = 1;
+    private final int CAMERA_REQUEST_CODE = 2;
 
+    //upload
+    byte[] selectedImageBytes;
+
+    //camera
+    byte[] imageBytes;
+
+
+    EditText etNoteTitle, etNoteSubtitle, etNoteDescription;
+    Button btnPickColor;
     FloatingActionButton fabCapturePhoto, fabUploadImage, fabBack, fabSaveNote;
     int defaultColor = Color.WHITE;
     CardView cvDescription;
     ImageView ivImage;
 
-    private final int GALLERY_REQ_CODE = 1;
-
-    byte[] selectedImageBytes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_note);
+
+
 
         btnPickColor = findViewById(R.id.btnPickColor);
 
@@ -56,10 +65,6 @@ public class NewNote extends AppCompatActivity {
         fabSaveNote = findViewById(R.id.fabSaveNote);
 
         ivImage = findViewById(R.id.ivImage);
-
-
-
-
 
         btnPickColor.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,10 +93,8 @@ public class NewNote extends AppCompatActivity {
                 // If title is empty, don't let user make a note, and tell them that Title cant be empty
                 if (!title.isEmpty()) {
                     try {
-                        // Send new note info to the Note class
 
-                        //if an image was uploaded
-
+                        //if image is selected
                         if (selectedImageBytes != null) {
                             note = new Note(-1, etNoteTitle.getText().toString(), etNoteSubtitle.getText().toString(),
                                     etNoteDescription.getText().toString(), defaultColor, selectedImageBytes);
@@ -99,7 +102,6 @@ public class NewNote extends AppCompatActivity {
                             note = new Note(-1, etNoteTitle.getText().toString(), etNoteSubtitle.getText().toString(),
                                     etNoteDescription.getText().toString(), defaultColor, null);
                         }
-
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -113,22 +115,26 @@ public class NewNote extends AppCompatActivity {
                 } else {
                     Toast.makeText(NewNote.this, "Title cannot be empty", Toast.LENGTH_SHORT).show();
                 }
-
                 startActivity(intent);
             }
         });
 
         fabUploadImage.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                Intent iGallery = new Intent(Intent.ACTION_PICK);
-                iGallery.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(iGallery, GALLERY_REQ_CODE);
+                Intent gallery = new Intent(Intent.ACTION_PICK);
+                gallery.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(gallery, GALLERY_REQ_CODE);
             }
         });
 
-
+        fabCapturePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, CAMERA_REQUEST_CODE);
+            }
+        });
     }
 
     @Override
@@ -136,17 +142,30 @@ public class NewNote extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == GALLERY_REQ_CODE) {
-                // for gallery
+            if (requestCode == CAMERA_REQUEST_CODE) {
+                if (data != null) {
+                    // Handle capturing a photo from the camera
+                    Bundle extras = data.getExtras();
+                    if (extras != null) {
+                        Bitmap capturedImage = (Bitmap) extras.get("data");
+                        // Display the image in your ImageView
+                        ivImage.setImageBitmap(capturedImage);
 
+                        // Convert the Bitmap to a byte array
+                        selectedImageBytes = convertBitmapToBytes(capturedImage);
+
+                    }
+                }
+
+            }
+            if (requestCode == GALLERY_REQ_CODE) {
                 if (data != null) {
                     Uri imageUri = data.getData();
 
                     // Convert the selected image to bytes
                     selectedImageBytes = convertImageToBytes(imageUri);
 
-
-                    // Display the image in your ImageView
+                    // Display image
                     ivImage.setImageURI(imageUri);
                 }
             }
@@ -170,6 +189,7 @@ public class NewNote extends AppCompatActivity {
         ambilWarnaDialog.show();
     }
 
+    // Function to convert an image to a byte array for DB storing
     private byte[] convertImageToBytes(Uri imageUri) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
@@ -183,5 +203,12 @@ public class NewNote extends AppCompatActivity {
             e.printStackTrace();
         }
         return byteArrayOutputStream.toByteArray();
+    }
+
+
+    private byte[] convertBitmapToBytes(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
     }
 }

@@ -21,9 +21,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DESCRIPTION = "DESCRIPTION";
     public static final String COLUMN_COLOR = "COLOR";
     public static final String COLUMN_ID = "ID";
-    public static final String NOTES_TABLE = "NOTES";
-
     public static final String COLUMN_IMAGE = "IMAGE";
+    public static final String NOTES_TABLE = "NOTES";
 
     public DataBaseHelper(@Nullable Context context) {
         super(context, "notes.db", null, 1);
@@ -33,10 +32,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         String createTableStatement = "CREATE TABLE " + NOTES_TABLE + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_TITLE + " TEXT, " + COLUMN_SUBTITLE + " TEXT, " +
                 COLUMN_DESCRIPTION + " TEXT, " + COLUMN_COLOR + " INT, " + COLUMN_IMAGE + " BLOB)";
-
-//        String createTableStatement = "CREATE TABLE " + NOTES_TABLE + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-//                COLUMN_TITLE + " TEXT, " + COLUMN_SUBTITLE + " TEXT, " +
-//                COLUMN_DESCRIPTION + " TEXT, " + COLUMN_COLOR + " INT)";
 
         db.execSQL(createTableStatement);
     }
@@ -72,19 +67,20 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
             // Loop through cursor and create new note objects and then put them into return list
             do {
-
                 int noteID = cursor.getInt(0);
                 String noteTitle = cursor.getString(1);
                 String noteSubtitle = cursor.getString(2);
                 String noteDescription = cursor.getString(3);
                 int noteColor = cursor.getInt(4);
                 byte[] noteImage;
+
+                //if there is no image
                 if (!cursor.isNull(5)) {
                     noteImage = cursor.getBlob(5);
                 } else {
-                    // Handle the case where there is no image data (e.g., set noteImage to null or an empty byte[])
-                    noteImage = null; // Or an empty byte[] depending on your requirements
+                    noteImage = null;
                 }
+
                 Note newNote = new Note(noteID, noteTitle, noteSubtitle, noteDescription, noteColor, noteImage);
                 returnList.add(newNote);
 
@@ -107,18 +103,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_COLOR, note.getColor());
         cv.put(COLUMN_IMAGE, note.getImage());
 
-        Log.d("message", note.toString());
-        Log.d("id", String.valueOf(note.getId()));
         String whereClause = COLUMN_ID + " = ?";
         String[] whereArgs = {String.valueOf(note.getId())};
 
         int rowsUpdated = db.update(NOTES_TABLE, cv, whereClause, whereArgs);
-
-        if (rowsUpdated > 0) {
-            Log.d("Update", "Updated " + rowsUpdated + " rows");
-        } else {
-            Log.d("Update", "No rows updated");
-        }
 
         db.close();
     }
@@ -133,11 +121,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     public void clearDatabase() {
         SQLiteDatabase db = this.getWritableDatabase();
-
         String tableName = "NOTES";
-
         db.delete(tableName, null, null);
-
         db.close();
     }
 }
