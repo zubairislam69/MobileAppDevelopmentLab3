@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("note_subtitle", note.getSubtitle());
                     intent.putExtra("note_description", note.getDescription());
                     intent.putExtra("note_color", note.getColor());
+                    intent.putExtra("note_image", note.getImage());
 
                     startActivity(intent);
                 }
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("note_subtitle", note.getSubtitle());
                         intent.putExtra("note_description", note.getDescription());
                         intent.putExtra("note_color", note.getColor());
+                        intent.putExtra("note_image", note.getImage());
 
                         startActivity(intent);
                     }
@@ -93,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void filterNotes(String query, NoteAdapter.OnNoteClickListener onNoteClickListener) {
         List<Note> filteredNotes = new ArrayList<>();
+
         for (Note note : allNotes) {
             if (note.getTitle().toLowerCase().contains(query.toLowerCase())) {
                 filteredNotes.add(note);

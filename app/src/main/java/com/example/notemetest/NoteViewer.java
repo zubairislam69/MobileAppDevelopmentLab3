@@ -1,19 +1,30 @@
 package com.example.notemetest;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
 import yuku.ambilwarna.AmbilWarnaDialog;
 
@@ -22,12 +33,14 @@ public class NoteViewer extends AppCompatActivity {
     EditText etNoteTitle, etNoteSubtitle, etNoteDescription;
     CardView cvDescription;
     int defaultColor;
-    Button backButton, saveNoteButton, btnPickColor;
+    Button btnPickColor;
 
-    FloatingActionButton fabDeleteNote;
-
+    FloatingActionButton fabDeleteNote, fabCapturePhoto, fabUploadImage, fabBack, fabSaveNote;
+    ImageView ivImageNoteViewer;
     DataBaseHelper dataBaseHelper = new DataBaseHelper(NoteViewer.this);
+    byte[] selectedImageBytes;
 
+    private final int GALLERY_REQ_CODE = 1;
     int id;
 
     @Override
@@ -44,22 +57,34 @@ public class NoteViewer extends AppCompatActivity {
         String subtitle = intent.getStringExtra("note_subtitle");
         String description = intent.getStringExtra("note_description");
         defaultColor = intent.getIntExtra("note_color", Color.WHITE);
+        byte[] image = intent.getByteArrayExtra("note_image");
+
+        this.selectedImageBytes = image;
 
         etNoteTitle = findViewById(R.id.etNoteTitle);
         etNoteSubtitle = findViewById(R.id.etNoteSubtitle);
         etNoteDescription = findViewById(R.id.etNoteDescription);
         cvDescription = findViewById(R.id.cvDescription);
+        ivImageNoteViewer = findViewById(R.id.ivImageNoteViewer);
 
         etNoteTitle.setText(title);
         etNoteSubtitle.setText(subtitle);
         etNoteDescription.setText(description);
         cvDescription.setCardBackgroundColor(defaultColor);
+        ivImageNoteViewer.setImageBitmap(convertBytesToImage(image));
 
-        backButton = findViewById(R.id.btnBack);
-        saveNoteButton = findViewById(R.id.btnSaveNote);
         btnPickColor = findViewById(R.id.btnPickColor);
 
         fabDeleteNote = findViewById(R.id.fabDeleteNote);
+
+        fabCapturePhoto = findViewById(R.id.fabCapturePhoto);
+        fabUploadImage = findViewById(R.id.fabUploadImage);
+
+        fabBack = findViewById(R.id.fabBack);
+        fabSaveNote = findViewById(R.id.fabSaveNote);
+
+
+
 
         btnPickColor.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,7 +93,7 @@ public class NoteViewer extends AppCompatActivity {
             }
         });
 
-        backButton.setOnClickListener(new View.OnClickListener() {
+        fabBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(NoteViewer.this, MainActivity.class);
@@ -89,7 +114,7 @@ public class NoteViewer extends AppCompatActivity {
             }
         });
 
-        saveNoteButton.setOnClickListener(new View.OnClickListener() {
+        fabSaveNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(NoteViewer.this, MainActivity.class);
@@ -101,13 +126,14 @@ public class NoteViewer extends AppCompatActivity {
                 if (!title.isEmpty()) {
                     try {
                         note = new Note(id, etNoteTitle.getText().toString(), etNoteSubtitle.getText().toString(),
-                                etNoteDescription.getText().toString(), defaultColor);
+                                    etNoteDescription.getText().toString(), defaultColor, selectedImageBytes);
 
                     } catch (Exception e) {
                         Toast.makeText(NoteViewer.this, "Error creating note", Toast.LENGTH_SHORT).show();
-                        note = new Note(-1, "error", "error", "error", 0);
+                        note = new Note(-1, "error", "error", "error", 0, null);
                     }
                     dataBaseHelper = new DataBaseHelper(NoteViewer.this);
+
                     dataBaseHelper.updateNote(note);
 
                 } else {
@@ -116,6 +142,38 @@ public class NoteViewer extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        fabUploadImage.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent iGallery = new Intent(Intent.ACTION_PICK);
+                iGallery.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(iGallery, GALLERY_REQ_CODE);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == GALLERY_REQ_CODE) {
+                // for gallery
+
+                if (data != null) {
+                    Uri imageUri = data.getData();
+
+                    // Convert the selected image to bytes
+                    selectedImageBytes = convertImageToBytes(imageUri);
+
+
+                    // Display the image in your ImageView
+                    ivImageNoteViewer.setImageURI(imageUri);
+                }
+            }
+        }
     }
 
     public void openColorPicker() {
@@ -132,6 +190,30 @@ public class NoteViewer extends AppCompatActivity {
             }
         });
         ambilWarnaDialog.show();
+    }
+
+    private byte[] convertImageToBytes(Uri imageUri) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    private Bitmap convertBytesToImage(byte[] imageBytes) {
+        if (imageBytes != null) {
+            return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        } else {
+            // Handle the case where the byte array is null
+            return null;
+        }
     }
 
 }

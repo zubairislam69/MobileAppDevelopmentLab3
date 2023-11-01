@@ -1,10 +1,13 @@
 package com.example.notemetest;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,9 +40,15 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         TextView subtitleTextView = convertView.findViewById(R.id.subtitleTextView);
         TextView descriptionTextView = convertView.findViewById(R.id.descriptionTextView);
 
+        ImageView ivImageNote = convertView.findViewById(R.id.ivImageNote);
+
         titleTextView.setText(note.getTitle());
         subtitleTextView.setText(note.getSubtitle());
         descriptionTextView.setText(note.getDescription());
+
+
+        ivImageNote.setImageBitmap(convertBytesToImage(note.getImage()));
+
 
         // Set the background color based on the 'color' field
         convertView.setBackgroundColor(note.getColor());
@@ -52,5 +61,14 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         });
 
         return convertView;
+    }
+
+    private Bitmap convertBytesToImage(byte[] imageBytes) {
+        if (imageBytes != null) {
+            return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        } else {
+            // Handle the case where the byte array is null
+            return null;
+        }
     }
 }

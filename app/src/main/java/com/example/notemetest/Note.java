@@ -1,5 +1,7 @@
 package com.example.notemetest;
 
+import java.util.Arrays;
+
 public class Note {
 
     private int id;
@@ -7,13 +9,16 @@ public class Note {
     private String subtitle;
     private String description;
     private int color;
+    private byte[] image;
 
-    public Note(int id, String title, String subtitle, String description, int color) {
+    public Note(int id, String title, String subtitle, String description, int color, byte[] image) {
         this.id = id;
         this.title = title;
         this.subtitle = subtitle;
         this.description = description;
         this.color = color;
+        this.image = image;
+
     }
 
     @Override
@@ -23,7 +28,8 @@ public class Note {
                 ", title='" + title + '\'' +
                 ", subtitle='" + subtitle + '\'' +
                 ", description='" + description + '\'' +
-                ", color='" + color + '\'' +
+                ", color=" + color +
+                ", image=" + Arrays.toString(image) +
                 '}';
     }
 
@@ -65,5 +71,13 @@ public class Note {
 
     public void setColor(int color) {
         this.color = color;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 }
