@@ -36,15 +36,15 @@ public class NoteAdapter extends ArrayAdapter<Note> {
 
         Note note = getItem(position);
 
-        TextView titleTextView = convertView.findViewById(R.id.titleTextView);
-        TextView subtitleTextView = convertView.findViewById(R.id.subtitleTextView);
-        TextView descriptionTextView = convertView.findViewById(R.id.descriptionTextView);
+        TextView tvTitle = convertView.findViewById(R.id.tvTitle);
+        TextView tvSubtitle = convertView.findViewById(R.id.tvSubtitle);
+        TextView tvDescription = convertView.findViewById(R.id.tvDescription);
 
         ImageView ivImageNote = convertView.findViewById(R.id.ivImageNote);
 
-        titleTextView.setText(note.getTitle());
-        subtitleTextView.setText(note.getSubtitle());
-        descriptionTextView.setText(note.getDescription());
+        tvTitle.setText(note.getTitle());
+        tvSubtitle.setText(note.getSubtitle());
+        tvDescription.setText(note.getDescription());
 
         ivImageNote.setImageBitmap(convertBytesToImage(note.getImage()));
 
@@ -66,7 +66,6 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         if (imageBytes != null) {
             return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
         } else {
-            // Handle the case where the byte array is null
             return null;
         }
     }

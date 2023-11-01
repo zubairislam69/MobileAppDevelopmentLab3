@@ -28,12 +28,7 @@ public class NewNote extends AppCompatActivity {
     private final int GALLERY_REQ_CODE = 1;
     private final int CAMERA_REQUEST_CODE = 2;
 
-    //upload
-    byte[] selectedImageBytes;
-
-    //camera
     byte[] imageBytes;
-
 
     EditText etNoteTitle, etNoteSubtitle, etNoteDescription;
     Button btnPickColor;
@@ -49,7 +44,7 @@ public class NewNote extends AppCompatActivity {
         setContentView(R.layout.activity_new_note);
 
 
-
+        // START Find Views
         btnPickColor = findViewById(R.id.btnPickColor);
 
         etNoteTitle = findViewById(R.id.etNoteTitle);
@@ -65,7 +60,10 @@ public class NewNote extends AppCompatActivity {
         fabSaveNote = findViewById(R.id.fabSaveNote);
 
         ivImage = findViewById(R.id.ivImage);
+        // END Find Views
 
+
+        // Pick Color Button Listener
         btnPickColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,6 +71,7 @@ public class NewNote extends AppCompatActivity {
             }
         });
 
+        // Back FAB listener to go back to home screen
         fabBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,6 +80,7 @@ public class NewNote extends AppCompatActivity {
             }
         });
 
+        // Save Note FAB listener to save note to DB
         fabSaveNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,9 +95,9 @@ public class NewNote extends AppCompatActivity {
                     try {
 
                         //if image is selected
-                        if (selectedImageBytes != null) {
+                        if (imageBytes != null) {
                             note = new Note(-1, etNoteTitle.getText().toString(), etNoteSubtitle.getText().toString(),
-                                    etNoteDescription.getText().toString(), defaultColor, selectedImageBytes);
+                                    etNoteDescription.getText().toString(), defaultColor, imageBytes);
                         } else {
                             note = new Note(-1, etNoteTitle.getText().toString(), etNoteSubtitle.getText().toString(),
                                     etNoteDescription.getText().toString(), defaultColor, null);
@@ -119,6 +119,7 @@ public class NewNote extends AppCompatActivity {
             }
         });
 
+        // Upload Note FAB listener to upload an image from gallery to the note
         fabUploadImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -128,6 +129,7 @@ public class NewNote extends AppCompatActivity {
             }
         });
 
+        // Capture Photo FAB listener to capture a photo using the camera and store it in note
         fabCapturePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -142,28 +144,32 @@ public class NewNote extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
+
+            // Capturing picture
             if (requestCode == CAMERA_REQUEST_CODE) {
                 if (data != null) {
-                    // Handle capturing a photo from the camera
+
                     Bundle extras = data.getExtras();
                     if (extras != null) {
+
                         Bitmap capturedImage = (Bitmap) extras.get("data");
-                        // Display the image in your ImageView
+
+                        // Convert the Bitmap image to a byte array
+                        imageBytes = convertBitmapToBytes(capturedImage);
+
+                        // Display image
                         ivImage.setImageBitmap(capturedImage);
-
-                        // Convert the Bitmap to a byte array
-                        selectedImageBytes = convertBitmapToBytes(capturedImage);
-
                     }
                 }
-
             }
+
+            // Uploading picture
             if (requestCode == GALLERY_REQ_CODE) {
                 if (data != null) {
                     Uri imageUri = data.getData();
 
                     // Convert the selected image to bytes
-                    selectedImageBytes = convertImageToBytes(imageUri);
+                    imageBytes = convertImageToBytes(imageUri);
 
                     // Display image
                     ivImage.setImageURI(imageUri);
@@ -205,7 +211,7 @@ public class NewNote extends AppCompatActivity {
         return byteArrayOutputStream.toByteArray();
     }
 
-
+    // Function to convert an bitmap to a byte array for DB storing
     private byte[] convertBitmapToBytes(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
